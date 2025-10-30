@@ -1,10 +1,11 @@
-POST http://localhost:8080/api/products
+GET http://localhost:8080/api/products
 Content-Type: application/json
 
 {
-  "name": "Laptop IntelliJ",
-  "description": "Tạo trực tiếp từ IntelliJ",
-  "price": 25000000,
-  "stockQuantity": 15,
-  "imageUrl": "image.png"
-}
+    "id": 30,
+    "name": "iPhone 16",
+    "description": "Latest Apple phone",
+    "price": 3600.0,
+    "stock": 200,
+    "imgUrl": "iphone16.jpg"
+  },
