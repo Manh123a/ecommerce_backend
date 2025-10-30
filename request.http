@@ -8,4 +8,4 @@ Content-Type: application/json
     "price": 3600.0,
     "stock": 200,
     "imgUrl": "iphone16.jpg"
-  },
+}
