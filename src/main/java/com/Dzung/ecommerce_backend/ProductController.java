@@ -3,7 +3,7 @@ package com.Dzung.ecommerce_backend;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
-@CrossOrigin(origins = "http://localhost:3000/")
+
 @RestController // handle HTTP request (like Get, Post, etc)
 @RequestMapping("/api/products") // tell this controller where to start with (/api/products)
 public class ProductController {

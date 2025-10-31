@@ -6,8 +6,10 @@ package com.Dzung.ecommerce_backend;
 //@Entity
 //@Table(name = products)
 public class Product {
+
 //    @id
 //    @GeneratedValue(strategy = GenerationType.IDENTITY)
+
     private int id;
     private String name;
     private String description;
