@@ -1,25 +1,88 @@
 package com.Dzung.ecommerce_backend;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import java.util.List;
-@CrossOrigin(origins = "http://localhost:3000/")
-@RestController // handle HTTP request (like Get, Post, etc)
-@RequestMapping("/api/products") // tell this controller where to start with (/api/products)
-public class ProductController {
-    @Autowired // able to create and inject an instance of ProductRepository
-    private ProductRepository productRepository;
 
+import java.util.List;
+import java.util.Optional;
+
+@CrossOrigin(origins = "http://localhost:3000/")
+@RestController
+@RequestMapping("/api/products")
+public class ProductController {
+
+    // Tiêm ProductService thay vì ProductRepository
+    private final ProductService productService;
+
+    // Sử dụng Constructor Injection - đây là best practice
+    @Autowired
+    public ProductController(ProductService productService) {
+        this.productService = productService;
+    }
+
+    /**
+     * API để lấy tất cả sản phẩm còn hoạt động (available).
+     */
     @GetMapping
-    public List<Product> getAllProducts() {
-        return productRepository.findAll(); // get all products from database
+    public ResponseEntity<List<Product>> getAllProducts() {
+        List<Product> products = productService.findAllAvailableProducts();
+        return ResponseEntity.ok(products); // Trả về 200 OK và danh sách sản phẩm
     }
+
+    /**
+     * API để lấy thông tin chi tiết một sản phẩm theo ID.
+     */
     @GetMapping("/{id}")
-    public Product getProductById(@PathVariable int id){
-        return productRepository.findById(id).orElse(null);
+    public ResponseEntity<Product> getProductById(@PathVariable Long id) {
+        Optional<Product> productOptional = productService.findProductById(id);
+
+        // Dùng biểu thức lambda để xử lý:
+        // Nếu tìm thấy product, trả về 200 OK và product đó.
+        // Nếu không, trả về 404 Not Found.
+        return productOptional
+                .map(product -> ResponseEntity.ok(product))
+                .orElse(ResponseEntity.notFound().build());
     }
-    @PostMapping // Post Request
-    public void createProduct(@RequestBody Product product){ // convert json to Product object
-        productRepository.save(product);
+
+    /**
+     * API để tạo một sản phẩm mới.
+     */
+    @PostMapping
+    public ResponseEntity<Product> createProduct(@RequestBody Product product) {
+        Product savedProduct = productService.saveProduct(product);
+        // Trả về 201 Created và thông tin sản phẩm vừa tạo
+        return new ResponseEntity<>(savedProduct, HttpStatus.CREATED);
+    }
+
+    /**
+     * API để cập nhật thông tin một sản phẩm.
+     */
+    @PutMapping("/{id}")
+    public ResponseEntity<Product> updateProduct(@PathVariable Long id, @RequestBody Product productDetails) {
+        try {
+            Product updatedProduct = productService.updateProduct(id, productDetails);
+            return ResponseEntity.ok(updatedProduct);
+        } catch (RuntimeException e) {
+            // Nếu không tìm thấy sản phẩm để cập nhật, trả về 404 Not Found
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    /**
+     * API để "xóa mềm" một sản phẩm.
+     * Sản phẩm sẽ không bị xóa khỏi CSDL mà chỉ bị đánh dấu là không còn available.
+     */
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteProduct(@PathVariable Long id) {
+        try {
+            productService.softDeleteProduct(id);
+            // Trả về 204 No Content - là mã thành công cho request DELETE
+            return ResponseEntity.noContent().build();
+        } catch (RuntimeException e) {
+            // Nếu không tìm thấy sản phẩm để xóa
+            return ResponseEntity.notFound().build();
+        }
     }
 }
